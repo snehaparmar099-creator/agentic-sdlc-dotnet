@@ -1,0 +1,55 @@
+{
+  "id": "ambiguous",
+  "type": "ambiguous",
+  "title": "Ambiguous: make the shortener safer and protect it from abuse",
+  "playbook": "ambiguous",
+  "toolchain": "dotnet",
+  "seed": "service",
+  "requirement": "Security flagged that our public URL shortener is being abused. Make it safer for public use and protect it from abuse.",
+  "context": "Existing .NET service in service/. One instance in production today.",
+  "approval_script": [
+    {
+      "node": "design",
+      "kind": "stage_output",
+      "occurrence": 1,
+      "decision": "reject",
+      "as": "security-lead",
+      "amend_node": "requirements",
+      "comment": "Also reject destinations that are themselves short links on our own domain; redirect chains hide the real target."
+    },
+    {
+      "node": "impl.rate_limiter",
+      "kind": "policy_hold",
+      "occurrence": 1,
+      "decision": "reject",
+      "as": "platform-owner",
+      "comment": "No new infrastructure for this change: drop the Redis limiter and dependency, we run a single instance."
+    },
+    {
+      "node": "requirements",
+      "kind": "clarification",
+      "decision": "approve",
+      "as": "product-owner",
+      "answers": {
+        "Q1": "Both of the above",
+        "Q2": "Per client IP, in-process token bucket (single instance today)",
+        "Q3": "20 creates/minute, burst 10"
+      }
+    },
+    {
+      "node": "design",
+      "kind": "stage_output",
+      "decision": "approve",
+      "as": "principal-engineer",
+      "comment": "Design and task plan approved."
+    },
+    {
+      "node": "release",
+      "kind": "stage_output",
+      "decision": "approve",
+      "as": "release-manager",
+      "comment": "GO."
+    }
+  ],
+  "faults": []
+}

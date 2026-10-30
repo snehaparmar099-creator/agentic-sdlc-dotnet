@@ -1,0 +1,47 @@
+{
+  "id": "greenfield",
+  "type": "greenfield",
+  "title": "Greenfield: build the URL shortener service",
+  "playbook": "greenfield",
+  "toolchain": "dotnet",
+  "seed": null,
+  "requirement": "Build a URL shortener service. Users create short links for long http(s) URLs, optionally with a custom alias. Visiting a short link redirects to the destination. Link owners can view metadata, delete links, and see click analytics (total clicks, clicks per day, top referrers). It will be exposed publicly, so validate inputs and do not store personal data in analytics.",
+  "context": "New repository. C# / .NET 10 (ASP.NET Core). Must run locally with no external infrastructure.",
+  "approval_script": [
+    {
+      "node": "design",
+      "kind": "stage_output",
+      "occurrence": 1,
+      "decision": "reject",
+      "as": "principal-engineer",
+      "comment": "Document the scaling path beyond a single SQLite node before we commit to it."
+    },
+    {
+      "node": "design",
+      "kind": "stage_output",
+      "decision": "approve",
+      "as": "principal-engineer",
+      "comment": "Design and task plan approved."
+    },
+    {
+      "node": "release",
+      "kind": "stage_output",
+      "decision": "approve",
+      "as": "release-manager",
+      "comment": "GO."
+    }
+  ],
+  "faults": [
+    {
+      "node": "impl.http_api",
+      "attempts": [
+        1
+      ],
+      "type": "corrupt_output",
+      "path": "src/UrlShortener/Endpoints.cs",
+      "find": "return Results.Json(LinkJson(link, settings), statusCode: StatusCodes.Status201Created);",
+      "replace": "return Results.Json(LinkJson(link, settings), statusCode: StatusCodes.Status200OK);",
+      "why": "simulates an agent regression the task's exit-gate tests must catch and roll back"
+    }
+  ]
+}

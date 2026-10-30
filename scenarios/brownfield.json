@@ -1,0 +1,46 @@
+{
+  "id": "brownfield",
+  "type": "brownfield",
+  "title": "Brownfield: link expiry + inflated click analytics bug",
+  "playbook": "brownfield",
+  "toolchain": "dotnet",
+  "seed": "service",
+  "requirement": "Product and marketing feedback on the existing URL shortener. (1) Campaign links must be able to expire: allow an optional expiry when creating a link; expired links must stop redirecting and return 410 Gone, and the expiry must be visible in link metadata. (2) Bug: click analytics are inflated. Link-preview bots (Slackbot, Twitterbot, facebookexternalhit, etc.) and HEAD requests are counted as human clicks. Bot traffic should remain visible but be excluded from total_clicks. Existing API clients must keep working.",
+  "context": "Existing production service in service/ (ASP.NET Core minimal APIs + SQLite). Live databases must upgrade in place.",
+  "approval_script": [
+    {
+      "node": "impl.data_layer",
+      "kind": "policy_hold",
+      "decision": "approve",
+      "as": "dba",
+      "comment": "Additive nullable column + defaulted flag; no table rewrite. Approved."
+    },
+    {
+      "node": "design",
+      "kind": "stage_output",
+      "decision": "approve",
+      "as": "principal-engineer",
+      "comment": "Design and task plan approved."
+    },
+    {
+      "node": "release",
+      "kind": "stage_output",
+      "decision": "approve",
+      "as": "release-manager",
+      "comment": "GO."
+    }
+  ],
+  "faults": [
+    {
+      "node": "impl.service_rules",
+      "attempts": [
+        1,
+        2,
+        3
+      ],
+      "type": "transient_error",
+      "message": "LLM provider timeout (simulated)",
+      "why": "exhausts the retry budget so the engine switches to the fallback agent"
+    }
+  ]
+}

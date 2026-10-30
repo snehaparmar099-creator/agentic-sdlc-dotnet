@@ -1,0 +1,4 @@
+# The orchestrator uses only the Python standard library (plus git).
+# pytest runs the orchestrator's own test suite. The URL shortener it builds is .NET:
+# see service/ (requires the .NET 10 SDK).
+pytest>=8.0
